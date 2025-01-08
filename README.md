@@ -19,6 +19,7 @@ PHPMYADMIN_PORT=80
 - `sudo docker compose up`
 
 Теперь сервисы тусуются тут:
-http://127.0.0.1:6001/ -- mysql
-http://127.0.0.1:6002/ -- webapp
-http://127.0.0.1:6003/ -- phpmyadmin
+
+- http://127.0.0.1:6001/ -- mysql
+- http://127.0.0.1:6002/ -- webapp
+- http://127.0.0.1:6003/ -- phpmyadmin
