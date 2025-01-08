@@ -11,6 +11,7 @@ MYSQL_PASSWORD=webapppwd
 DB_PORT=3306
 WEBAPP_PORT=8080
 PHPMYADMIN_PORT=80```
+
 - sudo docker compose build
 - sudo docker compose up
 
