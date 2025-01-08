@@ -1,0 +1,58 @@
+version: '3'
+name: "dbproj"
+
+services:
+
+  db:
+    container_name: db
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE     : ${MYSQL_DATABASE}
+      MYSQL_USER         : ${MYSQL_USER}
+      MYSQL_PASSWORD     : ${MYSQL_PASSWORD}
+    ports:
+      - "6001:${DB_PORT}"
+    volumes:
+      - "./db/init.sql:/docker-entrypoint-initdb.d/1.sql"
+    networks:
+      - mynetwork
+    restart: always
+
+  webapp:
+    container_name: webapp
+    depends_on:
+        - db
+    build:
+        context: ./webapp
+        dockerfile: Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE     : ${MYSQL_DATABASE}
+      MYSQL_USER         : ${MYSQL_USER}
+      MYSQL_PASSWORD     : ${MYSQL_PASSWORD}
+      DB_PORT            : ${DB_PORT}
+    ports:
+      - "6002:${WEBAPP_PORT}"
+    networks:
+      - mynetwork
+    restart: always
+
+  phpmyadmin:
+    container_name: phpmyadmin  
+    image: phpmyadmin/phpmyadmin
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: ${DB_PORT}
+      PMA_ARBITRARY: 1
+    ports:
+      - 6003:${PHPMYADMIN_PORT}
+    networks:
+      - mynetwork
+    restart: always
+
+networks:
+  mynetwork:
+    driver: bridge

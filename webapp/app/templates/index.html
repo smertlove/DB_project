@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COFFEE</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #73523d;
+            background-image: url('./map.jpg');
+            background-size: contain;
+            background-repeat:no-repeat;
+            background-position: center center;
+            
+        }
+
+
+        .circle {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            
+        }
+        .circle-container {
+          position: absolute;
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          overflow: hidden;
+        }
+
+        .circle-container img {
+          width: 80%;
+          height: 80%;
+          margin-left: 8%;
+          margin-top: 6%;
+          object-fit: contain;
+        }
+
+         .Stormwind{
+            top: 530px;
+            left: 990px;
+            background-color: blue;
+        }
+        .Ironforge{
+            top: 420px;
+            left: 1036px;
+            background-color: red;
+        }
+        .Darnassus{
+            top: 90px;
+            left: 400px;
+            background-color: green;
+        }
+
+
+
+        form {
+            padding-bottom: 20px;
+            padding-top: 8px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            position: fixed;
+            bottom: 0;
+            /* background-color: #73523d; */
+        }
+
+        #OrderForm {
+            right: 0;
+            padding-right: 30px;
+            padding-left: 8px;
+        }
+
+        #AddCoffeeForm {
+            left: 0;
+            padding-right: 8px;
+            padding-left: 30px;
+        }
+    </style>
+</head>
+<body>
+    <form id="OrderForm">
+        <input type="email" id="email" placeholder="Enter your email" required>
+        <input type="password" id="password" placeholder="Enter your password" required>
+        <select id="coffeeType" required>
+            <option value="" disabled selected>Select Coffee Type</option>
+            {% for coffee in coffee_objects %}
+                <option value="{{ coffee.value }}">{{ coffee.name }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    <form id="AddCoffeeForm">
+        <input type="email" id="f_email" placeholder="Enter your email" required>
+        <input type="number" id="f_newQuantity" placeholder="Enter quantity" required>
+         <select id="f_city" required>
+           <option value="" disabled selected>Select City</option>
+           <option value="Stormwind">Stormwind</option>
+           <option value="Ironforge">Ironforge</option>
+           <option value="Darnassus">Darnassus</option>
+       </select>
+       <button type="submit">Submit</button>
+   </form>
+   <div class="circle circle-container Stormwind">
+       <a href="/order?city=Stormwind">
+           <img src="./coffee-cup.png" alt="coffee">
+       </a>
+   </div>
+   <div class="circle circle-container Ironforge">
+       <a href="/order?city=Ironforge">
+           <img src="./coffee-cup.png" alt="coffee">
+       </a>
+   </div>
+   <div class="circle circle-container Darnassus">
+       <a href="/order?city=Darnassus">
+           <img src="./coffee-cup.png" alt="coffee">
+       </a>
+   </div>
+
+   <script>
+       document.querySelectorAll('.circle-container a').forEach(link => {
+           link.addEventListener('click', function(event) {
+               event.preventDefault(); // Prevent the default link behavior
+
+               const email = document.getElementById('email').value;
+               const password = document.getElementById('password').value;
+               const coffeeType = document.getElementById('coffeeType').value;
+               const city = new URL(this.href, window.location.origin).searchParams.get('city');
+
+               if (email && password && coffeeType && city) {
+                 const orderData = {email, password, coffeeType, city};
+                fetch('/order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData),
+                    })
+                   .then(response => {
+                       if(response.ok){
+                            alert(`Order placed for ${coffeeType} at ${city} for email ${email}`)
+                       } else{
+                        if (response.status == 499) {
+                            alert('Not enough coffee');
+                        } else {
+                            alert('Failed to add coffee');
+                        }
+                       }
+                   })
+                    .catch(error => {
+                     alert('Error placing order');
+
+                 });
+               } else {
+                alert('Please fill in the email and coffee type');
+               }
+           });
+       });
+
+      const addCoffeeForm = document.getElementById('AddCoffeeForm');
+      addCoffeeForm.addEventListener('submit', function(event){
+        event.preventDefault();
+        const f_email = document.getElementById('f_email').value;
+        const f_newQuantity = document.getElementById('f_newQuantity').value;
+        const f_city = document.getElementById('f_city').value;
+
+        if(f_email && f_newQuantity && f_city){
+            const addCoffeeData = {
+                email: f_email,
+                quantity: f_newQuantity,
+                city: f_city
+            }
+            fetch('/add_coffee', {
+               method: 'POST',
+               headers: {'Content-Type': 'application/json'},
+               body: JSON.stringify(addCoffeeData)
+            }).then(response => {
+                if(response.ok){
+                     alert(`Coffee added for ${f_email} at ${f_city} with quantity ${f_newQuantity}`)
+                }else{
+                    if (response.status == 403) {
+                            alert(`Incorrect password for ${f_email}`);
+                        } else {
+                            alert('Failed to order coffee');
+                        }                    
+                }
+            }).catch(error => {
+                alert('Error adding coffee');
+
+            })
+
+        }
+        else{
+          alert('Please fill in all fields')
+        }
+      })
+   </script>
+</body>
+</html>
+
